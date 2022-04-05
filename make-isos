@@ -1,0 +1,20 @@
+#!/bin/sh
+for file in x86/*.flat
+do
+	base=`basename $file .flat`
+	isodir=${base}_iso
+
+	rm -fr ${isodir}
+	mkdir -p ${isodir}/boot/grub
+	cp $file ${isodir}/boot
+	cat >${isodir}/boot/grub/grub.cfg<<EOF
+set timeout=0
+set default=0
+
+menuentry "${base}" {
+    multiboot /boot/${base}.flat
+    boot
+}
+EOF
+	PATH=/opt/gnu/bin:/opt/grub/bin:/usr/gnu/bin:$PATH grub-mkrescue -o ${base}.iso ${isodir}
+done
